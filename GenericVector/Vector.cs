@@ -1,4 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Collections.Generic;
 using ExtendedArithmetic;
 
 namespace GenericVector
@@ -237,6 +240,65 @@ namespace GenericVector
 			return ScalarMultiply(result, GenericArithmetic<T>.Two);
 		}
 
+		/// <summary>
+		/// Performs a linear interpolation between two vectors based on the given weighting.
+		/// </summary>
+		/// <param name="first">The first vector.</param>
+		/// <param name="second">The second vector.</param>
+		/// <param name="amount">A value between 0 and 1 that indicates the weight of the second vector.</param>
+		/// <returns>The distance.</returns>
+		public static Vector<T> Lerp(Vector<T> first, Vector<T> second, T amount)
+		{
+			return Add(ScalarMultiply(first, GenericArithmetic<T>.Subtract(GenericArithmetic<T>.One, amount)), ScalarMultiply(second, amount));
+		}
+
+		/// <summary>
+		/// Returns the distance of the vector.
+		/// </summary>
+		/// <param name="first">The first vector.</param>
+		/// <param name="second">The second vector.</param>
+		/// <returns>The distance.</returns>
+		public static T Distance(Vector<T> first, Vector<T> second)
+		{
+			T distanceSquared = DistanceSquared(first, second);
+			return GenericArithmetic<T>.SquareRoot(distanceSquared);
+		}
+
+		/// <summary>
+		/// Returns the distance of the vector squared.
+		/// </summary>
+		/// <param name="first">The first vector.</param>
+		/// <param name="second">The second vector.</param>
+		/// <returns>The distance squared.</returns>
+		public static T DistanceSquared(Vector<T> first, Vector<T> second)
+		{
+			Vector<T> difference = Subtract(first, second);
+			return DotProduct(difference, difference);
+		}
+
+		/// <summary>
+		/// Returns the length of the vector.
+		/// </summary>
+		/// <param name="first">The first vector.</param>
+		/// <param name="second">The second vector.</param>
+		/// <returns>The length.</returns>
+		public static T Length(Vector<T> first, Vector<T> second)
+		{
+			T lengthSquared = LengthSquared(first, second);
+			return GenericArithmetic<T>.SquareRoot(lengthSquared);
+		}
+
+		/// <summary>
+		/// Returns the length of the vector squared.
+		/// </summary>
+		/// <param name="first">The first vector.</param>
+		/// <param name="second">The second vector.</param>
+		/// <returns>The length squared.</returns>
+		public static T LengthSquared(Vector<T> first, Vector<T> second)
+		{
+			return DotProduct(first, second);
+		}
+
 		/*
 		/// <summary>
 		/// Turns a Vector into a polynomial, using the vector values in order as the coefficients.
@@ -248,26 +310,26 @@ namespace GenericVector
 		{
 			List<int> intElements =
 				Elements
-				.Select(d => GenericArithmeticFactory<T>.ConvertImplementation<T, int>.Convert(d))
+				.Select(d => GenericArithmetic<T>.Convert<int>(d))
 				.Where(i => i != 0)
 				.ToList();
 
 			int degree = intElements.Count - 1;
-			List<Term> terms = new List<Term>();
+			List<Term<T>> terms = new List<Term<T>>();
 			foreach (int i in intElements)
 			{
-				Term newTerm = new Term(i, degree);
+				Term<T> newTerm = new Term<T>(i, degree);
 				terms.Add(newTerm);
 				degree--;
 			}
-			return new Polynomial(terms.ToArray());
+			return new Polynomial<T>(terms.ToArray());
 		}
 
 		/// <summary>Turns a coefficient array from a ExtendedArithmetic.Polynomial instance into a Vector instance.</summary>
 		public static Vector<T> FromPolynomial(Polynomial m)
 		{
 			T[] elements = m.Terms.Select(trm => (double)trm.CoEfficient)
-									.Select(d => GenericArithmeticFactory<T>.ConvertImplementation<double, T>.Convert(d))
+									.Select(d => GenericArithmetic<T>.Convert<double>(d))
 									.ToArray();
 			return Vector<T>.Factory(elements);
 		}

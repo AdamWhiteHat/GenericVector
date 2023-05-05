@@ -1,13 +1,42 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net45;net46;net48;netstandard2.1;netcoreapp3.1;net5.0;net6.0;net7.0</TargetFrameworks>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="ExtendedArithmetic.GenericArithmetic" Version="2023.122.900" />
-  </ItemGroup>
+	<PropertyGroup>
+		<Title>ExtendedArithmetic.GenericVector</Title>
+		<Product>ExtendedArithmetic.GenericVector</Product>
+		<AssemblyName>ExtendedArithmetic.GenericVector</AssemblyName>
+		<AssemblyTitle>ExtendedArithmetic.GenericVector</AssemblyTitle>
+		<PackageId>ExtendedArithmetic.GenericVector</PackageId>
+		<Description>A generic Vector numeric type. Supports: Scalar arithmetic, vector arithmetic, square root, dot product, normal, reflection, distance, lerp, sum of squares and cosine similarity.</Description>
+		<Authors>Adam White</Authors>
+		<Company>Adam White</Company>
+		<Copyright>Made by Adam White</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>generic math maths mathematics vector vectors scalar matrix dot-product normal distance lerp arithmetic numeric numerics numbers type types arbitrary csharp</PackageTags>
+		<PackageProjectUrl>https://www.nuget.org/packages/ExtendedArithmetic.GenericVector</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/AdamWhiteHat/GenericVector</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+
+		<Version>$([System.DateTime]::Now.ToString("yyyy."$([System.DateTime]::Now.DayOfYear)".HHmm"))</Version>
+		<AssemblyVersion>$([System.DateTime]::Now.ToString("yyyy."$([System.DateTime]::Now.DayOfYear)".HHmm"))</AssemblyVersion>
+		<FileVersion>$([System.DateTime]::Now.ToString("yyyy."$([System.DateTime]::Now.DayOfYear)".HHmm"))</FileVersion>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="ExtendedArithmetic.GenericArithmetic" Version="2023.122.900" />
+	</ItemGroup>
 
 </Project>

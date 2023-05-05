@@ -3,20 +3,23 @@ A generic Vector<T> numeric type.
 
 
 Supports:
-	Scalar Addition
-	Scalar Subtraction
-	Scalar Multiplication
-	Scalar Division
-	Vector Addition
-	Vector Subtraction
-	Vector Multiplication
-	Vector Division
-	Vector Square Root
-	DotProduct
-	Normal
-	Reflect
-	SumOfSquares
-	CosineSimilarity
+ - Scalar Addition
+ - Scalar Subtraction
+ - Scalar Multiplication
+ - Scalar Division
+ - Vector Addition
+ - Vector Subtraction
+ - Vector Multiplication
+ - Vector Division
+ - Vector Square Root
+ - DotProduct
+ - Normal
+ - Reflect
+ - Lerp (Linear interpolation)
+ - Distance
+ - Distance Squared
+ - Sum Of Squares
+ - CosineSimilarity
 
 
 #
