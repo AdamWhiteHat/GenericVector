@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Collections.Generic;
 using ExtendedArithmetic;
 
-namespace GenericVector
+namespace ExtendedArithmetic
 {
 
 	/// <summary>
