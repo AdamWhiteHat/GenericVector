@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using ExtendedArithmetic;
+using Newtonsoft.Json;
 
 namespace ExtendedArithmetic
 {
@@ -33,6 +34,7 @@ namespace ExtendedArithmetic
 		public Vector() { _internalArray = new T[0]; }
 
 		/// <summary>Instantiates a new Vector instance given an array of elements.</summary>
+		[JsonConstructor]
 		public Vector(T[] elements)
 		{
 			_internalArray = elements.ToArray(); // ToArray() to make a copy of the array

@@ -37,6 +37,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="ExtendedArithmetic.GenericArithmetic" Version="2023.122.900" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 
 </Project>
