@@ -19,14 +19,32 @@
 		<PackageTags>generic math maths mathematics vector vectors scalar matrix dot-product normal distance lerp arithmetic numeric numerics numbers type types arbitrary csharp</PackageTags>
 		<PackageProjectUrl>https://www.nuget.org/packages/ExtendedArithmetic.GenericVector</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/AdamWhiteHat/GenericVector</RepositoryUrl>
+		<PackageIcon>vector.png</PackageIcon>
 		<RepositoryType>git</RepositoryType>
 
-		<Version>$([System.DateTime]::Now.ToString("yyyy."$([System.DateTime]::Now.DayOfYear)".HHmm"))</Version>
-		<AssemblyVersion>$([System.DateTime]::Now.ToString("yyyy."$([System.DateTime]::Now.DayOfYear)".HHmm"))</AssemblyVersion>
-		<FileVersion>$([System.DateTime]::Now.ToString("yyyy."$([System.DateTime]::Now.DayOfYear)".HHmm"))</FileVersion>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
+	
+	<PropertyGroup>
+		<MajorVersion Condition=" '$(MajorVersion)' == '' ">3000</MajorVersion>
+		<MinorVersion Condition=" '$(MinorVersion)' == '' ">0</MinorVersion>
+		<PatchVersion Condition=" '$(PatchVersion)' == '' ">0</PatchVersion>
+
+		<BuildTimestamp>$([System.DateTime]::Now.DayOfYear.ToString().PadLeft(3,'0'))</BuildTimestamp>
+
+		<Version>$(MajorVersion).$(MinorVersion).$(PatchVersion)</Version>
+		<AssemblyVersion>$(Version).$(BuildTimestamp)</AssemblyVersion>
+		<PackageVersion>$(AssemblyVersion)</PackageVersion>
+	</PropertyGroup>
+	
+	<ItemGroup>
+	  <None Remove="vector.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="vector.png" Pack="true" PackagePath="\" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="..\README.md">

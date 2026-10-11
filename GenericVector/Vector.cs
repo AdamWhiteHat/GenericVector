@@ -2,12 +2,10 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Generic;
-using ExtendedArithmetic;
 using Newtonsoft.Json;
 
 namespace ExtendedArithmetic
 {
-
 	/// <summary>
 	/// A generic Vector numeric type.
 	/// </summary>
@@ -49,7 +47,7 @@ namespace ExtendedArithmetic
 		/// <summary>Clones a vector by creating a new copy of each element into a new instance.</summary>    
 		public Vector<T> Clone()
 		{
-			return new Vector<T>(_internalArray.ToArray());
+			return new Vector<T>(_internalArray.Select(e => GenericArithmetic<T>.Clone(e)).ToArray());
 		}
 
 		/// <summary>
@@ -121,22 +119,7 @@ namespace ExtendedArithmetic
 		public static T DotProduct(Vector<T> left, Vector<T> right)
 		{
 			Vector<T> productVector = Multiply(left, right);
-
-			T result = default(T);
-			bool isFirstPass = true;
-			foreach (T t in productVector.Elements)
-			{
-				if (isFirstPass)
-				{
-					isFirstPass = false;
-					result = t;
-				}
-				else
-				{
-					result = GenericArithmetic<T>.Add(result, t);
-				}
-			}
-			return result;
+			return productVector.Elements.Aggregate(GenericArithmeticFactory<T>.Zero, (accumulator, current) => GenericArithmetic<T>.Add(accumulator, current));
 		}
 
 		/// <summary>
@@ -147,7 +130,7 @@ namespace ExtendedArithmetic
 		/// <returns>The summed vector.</returns>
 		public static Vector<T> Add(Vector<T> left, Vector<T> right)
 		{
-			return PairwiseForEach(left, right, GenericArithmetic<T>.Add);
+			return PairwiseForEach(left, right, ExpressionType.Add);
 		}
 
 		/// <summary>
@@ -158,7 +141,7 @@ namespace ExtendedArithmetic
 		/// <returns>The difference vector.</returns>
 		public static Vector<T> Subtract(Vector<T> left, Vector<T> right)
 		{
-			return PairwiseForEach(left, right, GenericArithmetic<T>.Subtract);
+			return PairwiseForEach(left, right, ExpressionType.Subtract);
 		}
 
 		/// <summary>
@@ -169,7 +152,7 @@ namespace ExtendedArithmetic
 		/// <returns>The product vector.</returns>
 		public static Vector<T> Multiply(Vector<T> left, Vector<T> right)
 		{
-			return PairwiseForEach(left, right, GenericArithmetic<T>.Multiply);
+			return PairwiseForEach(left, right, ExpressionType.Multiply);
 		}
 
 		/// <summary>
@@ -180,7 +163,18 @@ namespace ExtendedArithmetic
 		/// <returns>The vector resulting from the division.</returns>
 		public static Vector<T> Divide(Vector<T> left, Vector<T> right)
 		{
-			return PairwiseForEach(left, right, GenericArithmetic<T>.Divide);
+			return PairwiseForEach(left, right, ExpressionType.Divide);
+		}
+
+		/// <summary>
+		/// Takes the first vector modulo the second.
+		/// </summary>
+		/// <param name="left">The first source vector.</param>
+		/// <param name="right">The second source vector.</param>
+		/// <returns>A vector of resulting congruences.</returns>
+		public static Vector<T> Mod(Vector<T> left, Vector<T> right)
+		{
+			return PairwiseForEach(left, right, ExpressionType.Modulo);
 		}
 
 		/// <summary>
@@ -191,8 +185,7 @@ namespace ExtendedArithmetic
 		/// <returns>The result of summation.</returns>
 		public static Vector<T> ScalarAdd(Vector<T> vector, T scalar)
 		{
-			Vector<T> scalarVector = new Vector<T>(Enumerable.Repeat(scalar, vector.Dimensions).ToArray());
-			return PairwiseForEach(vector, scalarVector, GenericArithmetic<T>.Add);
+			return PairwiseScalarOperation(vector, scalar, ExpressionType.Add);
 		}
 
 		/// <summary>
@@ -203,8 +196,7 @@ namespace ExtendedArithmetic
 		/// <returns>The scaled vector.</returns>
 		public static Vector<T> ScalarMultiply(Vector<T> vector, T scalar)
 		{
-			Vector<T> scalarVector = new Vector<T>(Enumerable.Repeat(scalar, vector.Dimensions).ToArray());
-			return PairwiseForEach(vector, scalarVector, GenericArithmetic<T>.Multiply);
+			return PairwiseScalarOperation(vector, scalar, ExpressionType.Multiply);
 		}
 
 		/// <summary>
@@ -215,14 +207,31 @@ namespace ExtendedArithmetic
 		/// <returns>The result of the division.</returns>
 		public static Vector<T> ScalarDivide(Vector<T> vector, T scalar)
 		{
+			return PairwiseScalarOperation(vector, scalar, ExpressionType.Divide);
+		}
+
+		/// <summary>
+		/// Takes each element of a vector modulo a given scalar.
+		/// </summary>
+		/// <param name="vector">The source vector.</param>
+		/// <param name="scalar">The scalar value.</param>
+		/// <returns>The resulting congruences, as a vector.</returns>
+		public static Vector<T> ScalarMod(Vector<T> vector, T scalar)
+		{
+			return PairwiseScalarOperation(vector, scalar, ExpressionType.Modulo);
+		}
+
+		/// <summary>private method that containst the common functionality amongst all the scalar arithmetic operations.</summary>
+		private static Vector<T> PairwiseScalarOperation(Vector<T> vector, T scalar, ExpressionType operation)
+		{
 			Vector<T> scalarVector = new Vector<T>(Enumerable.Repeat(scalar, vector.Dimensions).ToArray());
-			return PairwiseForEach(vector, scalarVector, GenericArithmetic<T>.Divide);
+			return PairwiseForEach(vector, scalarVector, operation);
 		}
 
 		/// <summary>
 		/// Returns a vector whose elements are the square root of each of the source vector's elements.
 		/// </summary>
-		/// <param name="value">The source vector.</param>
+		/// <param name="vector">The source vector.</param>
 		/// <returns>The square root vector.</returns>
 		public static Vector<T> SquareRoot(Vector<T> vector)
 		{
@@ -237,8 +246,8 @@ namespace ExtendedArithmetic
 		/// <returns>The reflected vector.</returns>
 		public static Vector<T> Reflect(Vector<T> vector, Vector<T> normal)
 		{
-			var dot = DotProduct(vector, normal);
-			var result = ScalarMultiply(normal, dot);
+			T dot = DotProduct(vector, normal);
+			Vector<T> result = ScalarMultiply(normal, dot);
 			return ScalarMultiply(result, GenericArithmetic<T>.Two);
 		}
 
@@ -251,7 +260,70 @@ namespace ExtendedArithmetic
 		/// <returns>The distance.</returns>
 		public static Vector<T> Lerp(Vector<T> first, Vector<T> second, T amount)
 		{
-			return Add(ScalarMultiply(first, GenericArithmetic<T>.Subtract(GenericArithmetic<T>.One, amount)), ScalarMultiply(second, amount));
+			Vector<T> left = ScalarMultiply(first, GenericArithmetic<T>.Subtract(GenericArithmetic<T>.One, amount));
+			Vector<T> right = ScalarMultiply(second, amount);
+			return Add(left, right);
+		}
+
+		/// <summary>
+		/// Performs a the inverse of lerp;
+		/// Gives you the weighting based on the value between two vectors.
+		/// </summary>
+		/// <param name="first">The first vector.</param>
+		/// <param name="second">The second vector.</param>
+		/// <param name="value">A value between the first vector and the second vector.</param>
+		/// <returns>The weight.</returns>
+		public static T InverseLerp(Vector<T> first, Vector<T> second, Vector<T> value)
+		{
+			Vector<T> AB = Subtract(second, first);
+			Vector<T> AV = Subtract(value, first);
+			return GenericArithmetic<T>.Divide(Vector<T>.DotProduct(AV, AB), Vector<T>.DotProduct(AB, AB));
+		}
+
+		/// <summary>Returns a vector whose elements are the absolute values of each of the specified vector's elements.</summary>
+		/// <param name="value">A vector.</param>
+		/// <returns>The absolute value vector.</returns>
+		public static Vector<T> Abs(Vector<T> value)
+		{
+			return ForEach(value, GenericArithmeticFactory<T>.CreateAbsFunction());
+		}
+
+		/// <summary>Restricts a vector between a minimum and a maximum value.</summary>
+		/// <param name="value1">The vector to restrict.</param>
+		/// <param name="min">The minimum value.</param>
+		/// <param name="max">The maximum value.</param>
+		/// <returns>The restricted vector.</returns>
+		public static Vector<T> Clamp(Vector<T> value1, Vector<T> min, Vector<T> max)
+		{
+			if (min.Dimensions != max.Dimensions || value1.Dimensions != max.Dimensions)
+			{
+				throw new Exception("All vector dimensions must be the same.");
+			}
+
+			Func<T, T, bool> greaterThanComparison = GenericArithmeticFactory<T>.GetComparisonExpression(ExpressionType.GreaterThan);
+			Func<T, T, bool> lessThanComparison = GenericArithmeticFactory<T>.GetComparisonExpression(ExpressionType.LessThan);
+
+			int index = 0;
+			Func<T, T> clamp = new Func<T, T>(
+				(t) =>
+				{
+					T result = t;
+
+					if (greaterThanComparison(t, max[index]))
+					{
+						result = max[index];
+					}
+					else if (lessThanComparison(t, min[index]))
+					{
+						result = min[index];
+					}
+
+					index++;
+					return result;
+				}
+			);
+
+			return ForEach(value1, clamp);
 		}
 
 		/// <summary>
@@ -301,6 +373,30 @@ namespace ExtendedArithmetic
 			return DotProduct(first, second);
 		}
 
+		/// <summary>
+		/// Projects the vector "a" orthogonally onto vector "b".
+		/// </summary>
+		/// <param name="a">The vector to project.</param>
+		/// <param name="b">The vector on which will be projected.</param>
+		/// <returns>The projection.</returns>
+		public static Vector<T> Project(Vector<T> a, Vector<T> b)
+		{
+			T quotient = GenericArithmetic<T>.Divide(DotProduct(a, b), DotProduct(a, a));
+			return Vector<T>.ScalarMultiply(a, quotient);
+		}
+
+		/// <summary>
+		/// Calculates the magnitude of the given vector 
+		/// as the square root of the dot product of the vector with itself.
+		/// </summary>
+		/// <param name="a">The vector to compute the magnitude of.</param>
+		/// <returns>The magnitude.</returns>
+		public static T Magnitude(Vector<T> a)
+		{
+			T dot = DotProduct(a, a);
+			return GenericArithmetic<T>.SquareRoot(dot);
+		}
+
 		/*
 		/// <summary>
 		/// Turns a Vector into a polynomial, using the vector values in order as the coefficients.
@@ -312,8 +408,7 @@ namespace ExtendedArithmetic
 		{
 			List<int> intElements =
 				Elements
-				.Select(d => GenericArithmetic<T>.Convert<int>(d))
-				.Where(i => i != 0)
+				.Where(i => GenericArithmetic<T>.NotEqual(i, GenericArithmeticFactory<T>.Zero))
 				.ToList();
 
 			int degree = intElements.Count - 1;
@@ -337,7 +432,21 @@ namespace ExtendedArithmetic
 		}
 		*/
 
-		/// <summary>Begins two vectors, takes an element from each vector and applies a function to each bijective pair, collecting the results in a new vector.</summary>
+		/// <summary>
+		/// Begins two vectors, takes an element from each vector 
+		/// and applies a function to each bijective pair, 
+		/// collecting the results in a new vector.
+		/// </summary>
+		private static Vector<T> PairwiseForEach(Vector<T> left, Vector<T> right, ExpressionType operation)
+		{
+			return PairwiseForEach(left, right, GenericArithmeticFactory<T>.GetBinaryExpression(operation));
+		}
+
+		/// <summary>
+		/// Begins two vectors, takes an element from each vector
+		/// and applies a function to each bijective pair,
+		/// collecting the results in a new vector.
+		/// </summary>
 		private static Vector<T> PairwiseForEach(Vector<T> left, Vector<T> right, Func<T, T, T> operation)
 		{
 			if (left.Dimensions != right.Dimensions)

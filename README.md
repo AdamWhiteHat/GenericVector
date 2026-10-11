@@ -7,15 +7,22 @@ Supports:
  - Scalar Subtraction
  - Scalar Multiplication
  - Scalar Division
+ - Scalar Modulo
  - Vector Addition
  - Vector Subtraction
  - Vector Multiplication
  - Vector Division
+ - Vector Modulo
  - Vector Square Root
  - DotProduct
  - Normal
  - Reflect
+ - Project
+ - Magnitude
  - Lerp (Linear interpolation)
+ - Inverse Lerp
+ - Abs
+ - Clamp
  - Distance
  - Distance Squared
  - Sum Of Squares
